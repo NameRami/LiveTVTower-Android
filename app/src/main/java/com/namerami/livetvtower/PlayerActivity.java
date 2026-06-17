@@ -22,14 +22,15 @@ public class PlayerActivity extends Activity {
 
     private ArrayList<String> streamUrls;
     private String channelName;
+
     private int currentUrlIndex = 0;
-    private boolean isTryingFallback = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
@@ -38,16 +39,18 @@ public class PlayerActivity extends Activity {
         setContentView(R.layout.activity_player);
 
         playerView = findViewById(R.id.playerView);
+
         channelName = getIntent().getStringExtra("channelName");
         streamUrls = getIntent().getStringArrayListExtra("streamUrls");
 
         if (streamUrls == null || streamUrls.isEmpty()) {
-            Toast.makeText(this, "No stream found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No stream URLs found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
         Toast.makeText(this, channelName, Toast.LENGTH_SHORT).show();
+
         startPlayer();
     }
 
@@ -86,15 +89,9 @@ public class PlayerActivity extends Activity {
         player.setMediaItem(mediaItem);
         player.prepare();
         player.play();
-        isTryingFallback = false;
     }
 
     private void tryNextStream() {
-        if (isTryingFallback) {
-            return;
-        }
-
-        isTryingFallback = true;
         currentUrlIndex++;
 
         if (currentUrlIndex < streamUrls.size()) {

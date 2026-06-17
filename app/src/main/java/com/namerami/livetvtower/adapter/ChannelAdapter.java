@@ -1,8 +1,13 @@
 package com.namerami.livetvtower.adapter;
 
+import android.content.Context;
+import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -40,19 +45,34 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     public void onBindViewHolder(@NonNull ChannelViewHolder holder, int position) {
         Channel channel = channels.get(position);
 
-        holder.channelName.setText(channel.getFlag() + " " + channel.getName());
+        // Set channel name
+        holder.channelName.setText(channel.getName());
 
-        String country = channel.getCountry() == null ? "" : channel.getCountry();
-        String group = channel.getGroup() == null ? "TV" : channel.getGroup();
-        String streamCount = channel.getUrls() == null ? "0" : String.valueOf(channel.getUrls().size());
+        // Set country with flag
+        if (channel.getFlag() != null && !channel.getFlag().isEmpty()) {
+            holder.countryFlag.setText(channel.getFlag());
+        } else {
+            holder.countryFlag.setText("🌍");
+        }
 
-        holder.channelGroup.setText(country + " · " + group + " · " + streamCount + " stream(s)");
+        holder.countryName.setText(channel.getCountry() != null ? channel.getCountry() : "Unknown");
 
+        // Set channel group
+        if (channel.getGroup() != null && !channel.getGroup().isEmpty()) {
+            holder.channelGroup.setText(channel.getGroup());
+        } else {
+            holder.channelGroup.setText("No Category");
+        }
+
+        // Set click listener
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onChannelClick(channel);
             }
         });
+
+        // Add ripple effect on click (FIXED)
+        holder.itemView.setForeground(createSelectableItemBackground(holder.itemView.getContext()));
     }
 
     @Override
@@ -60,14 +80,40 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         return channels.size();
     }
 
+    /**
+     * Creates a ripple drawable for touch feedback
+     * FIXED: Returns a proper RippleDrawable instead of ColorStateList
+     */
+    private RippleDrawable createSelectableItemBackground(Context context) {
+        // Create the ripple color (indigo with transparency)
+        int rippleColor = Color.argb(76, 99, 102, 241); // 30% opacity indigo
+
+        // Create the background color (transparent)
+        ColorDrawable background = new ColorDrawable(Color.TRANSPARENT);
+
+        // Create and return RippleDrawable
+        return new RippleDrawable(
+                android.content.res.ColorStateList.valueOf(rippleColor),
+                background,
+                null
+        );
+    }
+
     static class ChannelViewHolder extends RecyclerView.ViewHolder {
         TextView channelName;
         TextView channelGroup;
+        TextView countryName;
+        TextView countryFlag;
+        ImageView channelLogo;
 
         public ChannelViewHolder(@NonNull View itemView) {
             super(itemView);
+
             channelName = itemView.findViewById(R.id.channelName);
             channelGroup = itemView.findViewById(R.id.channelGroup);
+            countryName = itemView.findViewById(R.id.countryName);
+            countryFlag = itemView.findViewById(R.id.countryFlag);
+            channelLogo = itemView.findViewById(R.id.channelLogo);
         }
     }
 }

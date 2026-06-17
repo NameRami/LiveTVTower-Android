@@ -61,6 +61,7 @@ public class Channel {
         if (urls == null || urls.isEmpty()) {
             return "";
         }
+
         return urls.get(0);
     }
 }
